@@ -6,8 +6,8 @@
 #include <vector>
 const float G = 6.67e-11;
 const float epsilon = 1e-12;
-namespace project {
-inline body::compute_acceleration() {
+
+inline void project::system::compute_acceleration() {
   for (int i = 0; i < n_bodies; ++i) {
     for (int j = i + 1; j < n_bodies; ++j) {
       point<float> r{
@@ -20,7 +20,7 @@ inline body::compute_acceleration() {
     }
   }
 };
-inline void vel_verlet(system& sys, float dt, int t) {
+inline void project::vel_verlet(system& sys, float dt, int t) {
   for (int i = 0; i < sys.get_bodies().size(); ++i) {
     // update the position of body i
     sys.get_bodies()[i].pos.x += sys.get_bodies()[i].vel.x * dt +
@@ -37,4 +37,3 @@ inline void vel_verlet(system& sys, float dt, int t) {
         0.5 * (acc[i].y + sys.get_bodies()[i].acc.y) * dt;
   }
 };
-}  // namespace project
