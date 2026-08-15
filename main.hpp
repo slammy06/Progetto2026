@@ -1,98 +1,66 @@
+#ifndef PROJECT_MAIN_HPP
+#define PROJECT_MAIN_HPP
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <vector>
+
 namespace project {
 template <typename T1>
+
 struct point {
   T1 x;
   T1 y;
- };
+  T1 norm() {
+    return std::sqrt(x * x + y * y);
+    T1 operator+(point<T1> const& p) { return point<T1>{x + p.x, y + p.y}; };
+    T1 operator-(point<T1> const& p) { return point<T1>{x - p.x, y - p.y}; };
+    T1 operator+=(point<T1> const& p) {
+      x += p.x;
+      y += p.y;
+      return *this;
+    }
+  }
+};
 
-template <typename T1>
-  point<T1> operator+(point<T1> const& a, point<T1> const& b){
-return {a.x + b.x, a.y + b.y};
-}
-template <typename T1>
-point<T1> operator-(point<T1> const& a, point<T1> const& b){
-return {a.x - b.x, a.y - b.y};
-}
-template <typename T1>
-T1 operator*(point<T1> const& a, point<T1> const& b){
-return a.x * b.x + a.y * b.y;
-}
-template <typename T1>
-point<T1> operator*(point<T1> const& a, float const& b){
-return {a.x * b,  a.y * b};
-}
-template <typename T1>
-point<T1> operator*(point<T1> const& a, double const& b){
-return {a.x * b,  a.y * b};
-}
-template <typename T1>
-point<T1> operator*(point<T1> const& a, int const& b){
-return {a.x * b,  a.y * b};
-}
-template <typename T1>
-point<T1> operator/(point<T1> const& a, double const& b){
-return {a.x * b,  a.y * b};
-}
- 
+struct body {
+  point<float> pos{0.0, 0.0};
+  point<float> vel{0.0, 0.0};
+  point<float> acc{0.0, 0.0};
+  float mass{0.0};
+  float radius{0.0};
+};
 
-
-
-class body {
-  point<double> pos{0.0, 0.0};
-  point<double> vel{0.0, 0.0};
-  point<double> acc{0.0, 0.0};
-  double mass{0.0};
-  double radius{0.0};
+class system {
+  std::vector<body> bodies;
+  std::vector<float> energy;
+  int n_bodies{0};
 
  public:
-  body(point<double> const& p, point<double> const& v, point<double> const& a,
-       double m, double r) : pos(p), vel(v), acc(a), mass(m), radius(r) {};
-
-  point<double> get_pos() const {
-       return pos;
+  system(int n, std::vector<float> const& masses,
+         std::vector<point<float>> const& pos,
+         std::vector<point<float>> const& vel)
+      : n_bodies(n) {
+    assert(masses.size() == n);
+    for (int i = 0; i < n; i++) {
+      bodies.push_back(
+          body{pos[i], vel[i], point<float>{0.0, 0.0}, masses[i], 1.0});
+    }
+  };
+  auto get_bodies() { return bodies; };
+  auto get_accelerations() {  // returns the current accelerations of the bodies
+    std::vector<point<float>> acc;
+    for (int i = 0; i < bodies.size(); ++i) {
+      acc.push_back(bodies[i].acc);
+    }
+    return acc;
   }
-  point<double> get_vel() const {
-       return vel;
-  }
-  point<double> get_acc() const {
-       return acc;
-  }
-  double get_mass() const {
-       return mass;
-  }
-
+  void compute_acceleration();
 };
 
-double distance(point<double> const& a,point<double> const& b){
-       return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
-};
+void vel_verlet(system& sys, float dt,
+                int t);  // defines one step for a system type object
 
-class system{
-       std::vector<body> bodies;
-       float step{0.0};
-       int time{0};
-       bool is_default{false};
-       bool is_random{false};
+};  // namespace project
 
-       void add(body const& b){
-              bodies.push_back(b);
-       }
-
-       public: 
-       system(float s, int t, float m, float r, int n): step(s), time(t) {
-        for(int i = 0; i<n; i++){
-        }
-       }
-       void evolve(){
-switch (is_default){
-    case true:
-
-}
-       }
-
-};
-
-
-}  // namespace project
+#endif
