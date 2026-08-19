@@ -3,7 +3,7 @@
 #include <string>
 
 #include "main.cpp"
-#include "main.hpp"
+
 const float pmax = 100000;
 const float pmin = 0;
 const float vmax = 1000;
@@ -23,11 +23,14 @@ int main() {
   }
 
   config.close();
-  //generazione delle restanti condizioni iniziali e inizializzazione del sistema
+  // generazione delle restanti condizioni iniziali e inizializzazione del
+  // sistema
   std::vector<point<float>> positions = generate_points(n, pmin, pmax);
   std::vector<point<float>> velocities = generate_points(n, vmin, vmax);
 
   project::system s(n, masses, positions, velocities);
 
-  // 
+  // codice per la simulazione grafica che richiama vel_verlot
+
+  //...
 }
