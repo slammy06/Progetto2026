@@ -23,22 +23,64 @@ inline void project::system::compute_acceleration() {
     }
   }
 };
+inline project::check project::collision_check(system const& sys){
+    check planet;
+    auto const& bodies = sys.get_bodies();
+     for (long unsigned int i = 0; i < bodies.size(); ++i) {
+    for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
+     project::point<float> r{
+          std::abs(bodies[i].pos.x - bodies[j].pos.x),
+          std::abs(bodies[i].pos.y - bodies[j].pos.y)};
+          float r_norm = r.norm();
+          float k_min = bodies[i].radius + bodies[j].radius;
+          if(r_norm <= k_min){
+            planet.i = i;
+            planet.j = j;
+            planet.crash = true;
+            return planet;
+          } else {
+            planet.crash = false;
+            return planet;
+          }
+    }
+}
+}
+inline void project::collided (system& syst, int i, int j){
+float mass_tot{0.};
+float radius_tot{0.};
+mass_tot = syst.get_bodies()[i].mass +  syst.get_bodies()[j].mass;
+radius_tot = syst.get_bodies()[i].radius +  syst.get_bodies()[j].radius;
+syst.get_bodies()[i].mass = mass_tot;
+syst.get_bodies()[i].radius = radius_tot;
+syst.get_bodies()[i].acc = {0., 0.};
+syst.get_bodies()[i].pos = syst.get_bodies()[i].pos * syst.get_bodies()[i].mass  + syst.get_bodies()[j].pos * syst.get_bodies()[j].mass/ mass_tot;
+syst.get_bodies()[i].vel = syst.get_bodies()[i].vel * syst.get_bodies()[i].mass  + syst.get_bodies()[j].vel * syst.get_bodies()[j].mass/ mass_tot;
+syst.get_bodies().erase(syst.get_bodies().begin() + j);
+syst.get_energy().erase(syst.get_energy().begin() + j);
+}
+
 inline void project::vel_verlet(system& sys, float dt, int t) {
-  for (long unsigned int l = 0; l < sys.get_bodies().size(); ++l) {
+    std::vector<body> bodies = sys.get_bodies();
+    for(dt = 0; dt<t; dt++){
+      check crashed = collision_check(sys);
+      if(crashed.crash == true){
+        collided(sys, crashed.i, crashed.j);
+        bodies.erase(bodies.begin() + crashed.j);
+        bodies[crashed.i] = sys.get_bodies()[crashed.i]; 
+      }
+  for (long unsigned int l = 0; l < bodies.size(); ++l) {
     // update the position of body i
-    sys.get_bodies()[l].pos.x += sys.get_bodies()[l].vel.x * dt +
-                                 0.5 * sys.get_bodies()[l].acc.x * dt * dt;
-    sys.get_bodies()[l].pos.y += sys.get_bodies()[l].vel.y * dt +
-                                 0.5 * sys.get_bodies()[l].acc.y * dt * dt;
+    bodies[l].pos += bodies[l].vel * dt +
+                                 bodies[l].acc * dt * dt * 0.5;
     std::vector<point<float>> acc = sys.get_accelerations();
 
     sys.compute_acceleration();
 
-    sys.get_bodies()[l].vel.x +=
-        0.5 * (acc[l].x + sys.get_bodies()[l].acc.x) * dt;
-    sys.get_bodies()[l].vel.y +=
-        0.5 * (acc[l].y + sys.get_bodies()[l].acc.y) * dt;
+    bodies[l].vel +=
+        (acc[l] + bodies[l].acc) * dt * 0.5;
+        sys.get_bodies()[l] = bodies[l];
   }
+}
 };
 
 inline std::vector<point<float>> generate_points(int n, float min, float max) {
