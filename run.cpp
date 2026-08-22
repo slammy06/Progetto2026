@@ -2,35 +2,55 @@
 #include <iostream>
 #include <string>
 
+#include "graphics.cpp"
 #include "main.cpp"
 
-const float pmax = 100000;
-const float pmin = 0;
-const float vmax = 1000;
-const float vmin = -1000;
+const float P_MAX = 800;
+const float V_MAX = 1000;
+const float V_MIN = -1000;
+const float dt = 0.01f;
 
 int main() {
-  // lettura dati dal file config.txt
+  // reading data from config.txt
   int n, t;
   std::vector<float> masses;
-  std::fstream config;
+  std::vector<point<float>> positions;
+  std::vector<point<float>> velocities;
+  std::vector<float> rads;
+
+  std::ifstream config;
   config.open("config.txt", std::ios::in);
   if (config.is_open()) {
     config >> n >> t;
     for (int i = 0; i < n; ++i) {
       config >> masses[i];
     }
+    for (int i = 0; i < n; ++i) {
+      config >> rads[i];
+    }
+    for (int i = 0; i < n; ++i) {
+    }
   }
 
   config.close();
-  // generazione delle restanti condizioni iniziali e inizializzazione del
-  // sistema
-  std::vector<point<float>> positions = generate_points(n, pmin, pmax);
-  std::vector<point<float>> velocities = generate_points(n, vmin, vmax);
+  // Initializing simulation and system with data from config.txt
 
-  project::system s(n, masses, positions, velocities);
+  System sys(n, masses, positions, velocities, rads);
+  Sim sim;
+  float accumulator = 0.0f;
+  // Simulation Loop
 
-  // codice per la simulazione grafica che richiama vel_verlot
+  while (sim.running()) {
+    
 
-  //...
+    while (accumulator <= t) {
+      // Update
+      sim.update();
+      vel_verlet(sys, dt);
+      sim.initBodies(sys);
+      // Render
+      sim.render();
+    }
+  }
+  
 }
