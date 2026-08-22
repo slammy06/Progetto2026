@@ -41,16 +41,16 @@ int main() {
   // Simulation Loop
 
   while (sim.running()) {
-    
-
     while (accumulator <= t) {
       // Update
+      sys.kineticEnergy();
+      sys.potentialEnergy();
       sim.update();
       vel_verlet(sys, dt);
       sim.initBodies(sys);
       // Render
       sim.render();
     }
+    sys.totalEnergy();
   }
-  
 }
