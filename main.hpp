@@ -2,7 +2,7 @@
 #define PROJECT_MAIN_HPP
 
 #include <vector>
-
+#include <cmath>
 namespace project {
 template <typename T1>
 
@@ -18,8 +18,8 @@ struct point {
     y += p.y;
     return *this;
   }
-  point operator*(const float& a) { return point<T1>{x * a, y* a} };
-  point operator/(const float& a) { return point<T1>{x / a, y / a} };
+  point operator*(const float& a) { return point<T1>{x * a, y* a}; };
+  point operator/(const float& a) { return point<T1>{x / a, y / a}; };
 };
 
 struct check {
@@ -41,7 +41,8 @@ class System {
   std::vector<float> kinetic;
   std::vector<float> potential;
   std::vector<float> totEnergy;
-
+  std::vector<point<float>> lin_momentum;
+  std::vector<float> ang_momentum;
   long unsigned int n_bodies{0};
 
  public:
@@ -50,7 +51,7 @@ class System {
   System(int n, std::vector<float> const& masses,
          std::vector<point<float>> const& pos,
          std::vector<point<float>> const& vel, std::vector<float> const& rads);
-
+  System(std::vector<Body> in_bodies);
   // Accessors
 
   auto& get_bodies() { return bodies; }
@@ -61,21 +62,27 @@ class System {
 
   auto get_accelerations();
 
+  auto get_lin_momentum() {return lin_momentum; }
+  auto get_ang_momentum() {return ang_momentum; }
+
   // Methods
 
   void compute_acceleration();
   void kineticEnergy();
   void potentialEnergy();
   void totalEnergy();
+  void linearMomentum();
+  void angularMomentum();
 };
 // Functions
-void vel_verlet();  // Defines one step for a system type object
+
 std::vector<point<float>> generate_points(
     int n);  // Generates a vector of random points
 
-check collision_check();  // Checks the system for collisions
-void collided();          // Definies the behaviour of colliding bodies
-
+check collision_check(System const& sys, int i);  // Checks the system for collisions
+void collided(System& syst, int i, int j);          // Definies the behaviour of colliding bodies
+void vel_verlet(System& sys, float dt);  // Defines one step for a system type object
+void step(System& sys, float dt);
 };  // namespace project
 
 #endif

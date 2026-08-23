@@ -22,6 +22,13 @@ System::System(int n, std::vector<float> const& masses,
         Body{pos[i], vel[i], point<float>{0.0, 0.0}, masses[i], rads[i]});
   }
 }
+System::System(std::vector<Body> in_bodies)
+    : n_bodies(in_bodies.size()) {
+  for (int i = 0; i < in_bodies.size(); i++) {
+    bodies.push_back(
+        in_bodies[i]);
+  }
+}
 // Methods
 
 inline void System::compute_acceleration() {  // calculates and sets
@@ -46,6 +53,7 @@ void System::kineticEnergy() {
   for (int i = 0; i < bodies.size(); ++i) {
     float v2 = std::pow(bodies[i].vel.norm(), 2);
     K += 0.5 * bodies[i].mass * v2;
+
   }
   kinetic.push_back(K);
 }
@@ -54,15 +62,31 @@ void System::potentialEnergy() {
   float U = 0.f;
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
+      if(i<j){
       point<float> r = bodies[j].pos - bodies[i].pos;
       float norm_r = r.norm();
-      U -= G * bodies[i].mass * bodies[j].mass /
-           (sqrt(norm_r * norm_r + epsilon * epsilon));
+      U -= -G * bodies[i].mass * bodies[j].mass / (norm_r);
+      }
     }
   }
   potential.push_back(U);
 }
-
+void System::linearMomentum() {
+  point<float> P {0., 0.};
+  for (int i = 0; i < bodies.size(); ++i) {
+    P += bodies[i].vel * bodies[i].mass;
+  }
+  lin_momentum.push_back(P);
+}
+void System::angularMomentum() {
+  float L {0.f};
+  for (int i = 0; i < bodies.size(); ++i) {
+    for (int j = 0; j < bodies.size(); ++j) {
+    L += (bodies[i].vel.x * bodies[j].pos.x + bodies[j].vel.x * bodies[i].pos.x) * bodies[i].mass;
+    }
+  }
+  ang_momentum.push_back(L);
+}
 void System::totalEnergy() {
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     totEnergy.push_back(kinetic[i] + potential[i]);
@@ -81,29 +105,8 @@ inline auto System::get_accelerations() {  // returns the current accelerations
 
 // Functions
 
-inline void vel_verlet(System& sys, float dt) {
-  std::vector<Body> bodies = sys.get_bodies();
-  check crashed = collision_check(sys);
-  if (crashed.crash == true) {
-    collided(sys, crashed.i, crashed.j);
-    bodies.erase(bodies.begin() + crashed.j);
-    bodies[crashed.i] = sys.get_bodies()[crashed.i];
-  }
 
-  // updating the positions
-  for (long unsigned int l = 0; l < bodies.size(); ++l) {
-    bodies[l].pos += bodies[l].vel * dt + bodies[l].acc * dt * dt * 0.5;
-  }
-  std::vector<point<float>> acc =
-      sys.get_accelerations();  // saving previous accelerations
-  sys.compute_acceleration();   // updating accelerations
-  // updating velocities
-  for (long unsigned int i = 0; i < bodies.size(); ++i) {
-    bodies[i].vel += (acc[i] + bodies[i].acc) * dt * 0.5;
-    sys.get_bodies()[i] = bodies[i];
-  }
-}
-inline std::vector<point<float>> generate_points(int n, float min, float max) {
+/*inline std::vector<point<float>> generate_points(int n, float min, float max) {
   std::vector<point<float>> points;
 
   std::default_random_engine eng;
@@ -111,15 +114,13 @@ inline std::vector<point<float>> generate_points(int n, float min, float max) {
   std::generate_n(std::back_inserter(points), n,
                   [&]() { return uniform(eng); });
   return points;
-}
+}*/
 
-inline project::check project::collision_check(System const& sys) {
+inline project::check project::collision_check(System const& sys, int i) {
   check planet;
-  auto const& bodies = sys.get_bodies();
-  for (long unsigned int i = 0; i < bodies.size(); ++i) {
+  auto bodies = sys.get_bodies();
     for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
-      project::point<float> r{std::abs(bodies[i].pos.x - bodies[j].pos.x),
-                              std::abs(bodies[i].pos.y - bodies[j].pos.y)};
+      point<float> r = bodies[j].pos - bodies[i].pos;
       float r_norm = r.norm();
       float k_min = bodies[i].radius + bodies[j].radius;
       if (r_norm <= k_min) {
@@ -127,14 +128,13 @@ inline project::check project::collision_check(System const& sys) {
         planet.j = j;
         planet.crash = true;
         return planet;
-      } else {
+      } 
+    }
         planet.crash = false;
         return planet;
-      }
-    }
-  }
+      
 }
-inline void collided(System& syst, int i, int j) {
+inline void project::collided(System& syst, int i, int j) {
   float mass_tot{0.};
   float radius_tot{0.};
   mass_tot = syst.get_bodies()[i].mass + syst.get_bodies()[j].mass;
@@ -151,3 +151,38 @@ inline void collided(System& syst, int i, int j) {
   syst.get_bodies().erase(syst.get_bodies().begin() + j);
   syst.get_totEnergy().erase(syst.get_totEnergy().begin() + j);
 }
+
+inline void project::vel_verlet(System& sys, float dt) {
+  std::vector<Body> bodies = sys.get_bodies();
+
+
+  // updating the positions
+  for (long unsigned int l = 0; l < bodies.size(); ++l) {
+      check crashed = collision_check(sys, l);
+  if (crashed.crash == true) {
+    collided(sys, crashed.i, crashed.j);
+    bodies.erase(bodies.begin() + crashed.j);
+    bodies[crashed.i] = sys.get_bodies()[crashed.i];
+    crashed.crash = false;
+  }
+    bodies[l].pos += bodies[l].vel * dt + bodies[l].acc * dt * dt * 0.5;
+  }
+  std::vector<point<float>> acc =
+      sys.get_accelerations();  // saving previous accelerations
+  sys.compute_acceleration();   // updating accelerations
+  // updating velocities
+  for (long unsigned int i = 0; i < bodies.size(); ++i) {
+    bodies[i].vel += (acc[i] + bodies[i].acc) * dt * 0.5;
+    sys.get_bodies()[i] = bodies[i];
+  }
+}
+
+void project::step(project::System& sys, float dt){
+  project::vel_verlet(sys, dt);
+      sys.kineticEnergy();
+      sys.potentialEnergy();
+      sys.linearMomentum();
+      sys.angularMomentum();
+}
+
+
