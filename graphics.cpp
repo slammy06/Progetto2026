@@ -107,28 +107,26 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
 
   float min = Get_Minimum(std::vector<float>{
       Get_Minimum(LinMomX), Get_Minimum(LinMomY), Get_Minimum(AngMom)});
-
+  float offset = 50;
   float scale = (this->VideoMode2.height) / (max + abs(min));
   for (long unsigned int i = 0; i < AngMom.size(); ++i) {
     // Drawing Angular Momentum part of chart in Blue
     this->dot.setFillColor(sf::Color::Blue);
 
     float x = i * (this->VideoMode2.width) / AngMom.size();
-    float y = -AngMom[i] * scale;
+    float y = AngMom[i] * scale + offset;
     this->dot.setPosition({x, y});
     this->ChartWindow->draw(dot);
     // Drawing Linear Momentum on X axis in Red
     this->dot.setFillColor(sf::Color::Red);
 
-    x = i * (this->VideoMode2.width) / LinMomX.size();
-    y = -LinMomX[i] * scale;
+    y = LinMomX[i] * scale + 2*offset;
     this->dot.setPosition({x, y});
     this->ChartWindow->draw(dot);
     // Drawing Linear Momentum on Y axis in Green
     this->dot.setFillColor(sf::Color::Green);
 
-    x = i * (this->VideoMode2.width) / LinMomY.size();
-    y = -LinMomY[i] * scale;
+    y = LinMomY[i] * scale + 3 * offset;
     this->dot.setPosition({x, y});
     this->ChartWindow->draw(dot);
   }

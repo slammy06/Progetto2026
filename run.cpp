@@ -8,7 +8,7 @@
 const float P_MAX = 800;
 const float V_MAX = 1000;
 const float V_MIN = -1000;
-const float dt = 0.01f;
+const float dt = 0.05f;
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
