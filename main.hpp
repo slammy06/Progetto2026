@@ -10,7 +10,7 @@ template <typename T1>
 struct point {
   T1 x;
   T1 y;
-  T1 norm() { return std::sqrt(x * x + y * y); }
+  T1 norm() const { return std::sqrt(x * x + y * y); }
 
   point operator+(const point<T1>& p) { return point<T1>{x + p.x, y + p.y}; }
   point operator-(const point<T1>& p) { return point<T1>{x - p.x, y - p.y}; }
@@ -73,6 +73,7 @@ class System {
   void totalEnergy();
   void linearMomentum();
   void angularMomentum();
+  void update_body_count();
 };
 // Functions
 void vel_verlet(System& sys,
@@ -90,8 +91,7 @@ void collided(System& syst,
 void step(System& sys, float dt);
 
 std::vector<point<float>> generate_points(int n, float min, float max);
-float Get_Maximum(std::vector<float> vec);
-float Get_Minimum(std::vector<float> vec);
+
 };  // namespace project
 
 #endif

@@ -106,6 +106,7 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
   const float chartLeft = 55.0f;
   const float plotWidth = chartWidth - chartLeft - 10.0f;
 
+  
   std::vector<float> linearX(samples);
   std::vector<float> linearY(samples);
   for (std::size_t i = 0; i < samples; ++i) {
@@ -120,7 +121,7 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
     }
     return result;
   };
-
+  // Enumerating the samples and their maximums + other style settings
   const float scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
                           maximumAbsolute(linearY)};
   const std::vector<float>* values[] = {&AngMom, &linearX, &linearY};
@@ -130,9 +131,9 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
                           "Linear momentum Py"};
 
   this->ChartWindow->clear(sf::Color::White);
-
+// main frame rendering loop
   for (int panel = 0; panel < 3; ++panel) {
-    const float baseline = (static_cast<float>(panel) + 0.7f) * panelHeight;
+    const float baseline = (static_cast<float>(panel) + 0.65f) * panelHeight;
     const float scale =
         scales[panel] == 0.0f ? 0.0f : (panelHeight * 0.45f) / scales[panel];
     this->dot.setFillColor(colors[panel]);

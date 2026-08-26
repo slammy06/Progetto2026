@@ -156,25 +156,34 @@ std::vector<project::check> project::collision_check(
   return planets;
 }
 inline void project::collided(System& syst, std::vector<check> const& planets) {
+  (void)planets;
   for (long unsigned int i = 0; i < syst.get_bodies().size(); ++i) {
     for (long unsigned int j = i + 1; j < syst.get_bodies().size(); ++j) {
-      if (planets[i].crash == true && planets[j].crash == true) {
-        float mass_tot{0.};
-        float radius_tot{0.};
-        mass_tot = syst.get_bodies()[i].mass + syst.get_bodies()[j].mass;
-        radius_tot = syst.get_bodies()[i].radius + syst.get_bodies()[j].radius;
+      const point<float> distance = syst.get_bodies()[j].pos -
+                                    syst.get_bodies()[i].pos;
+      if (distance.norm() <= syst.get_bodies()[i].radius +
+                                 syst.get_bodies()[j].radius) {
+        const float first_mass = syst.get_bodies()[i].mass;
+        const float second_mass = syst.get_bodies()[j].mass;
+        const float mass_tot = first_mass + second_mass;
+        const float radius_tot = syst.get_bodies()[i].radius +
+                                 syst.get_bodies()[j].radius;
         syst.get_bodies()[i].mass = mass_tot;
         syst.get_bodies()[i].radius = radius_tot;
         syst.get_bodies()[i].acc = {0., 0.};
         syst.get_bodies()[i].pos =
-            syst.get_bodies()[i].pos * syst.get_bodies()[i].mass +
-            syst.get_bodies()[j].pos * syst.get_bodies()[j].mass / mass_tot;
+            (syst.get_bodies()[i].pos * first_mass +
+             syst.get_bodies()[j].pos * second_mass) /
+            mass_tot;
         syst.get_bodies()[i].vel =
-            syst.get_bodies()[i].vel * syst.get_bodies()[i].mass +
-            syst.get_bodies()[j].vel * syst.get_bodies()[j].mass / mass_tot;
+            (syst.get_bodies()[i].vel * first_mass +
+             syst.get_bodies()[j].vel * second_mass) /
+            mass_tot;
         syst.get_bodies().erase(
-          syst.get_bodies().begin() +
-          static_cast<std::vector<Body>::difference_type>(j));
+            syst.get_bodies().begin() +
+            static_cast<std::vector<Body>::difference_type>(j));
+        syst.update_body_count();
+        return;
       }
     }
   }
@@ -187,21 +196,5 @@ void project::step(project::System& sys, float dt) {
   sys.angularMomentum();
 };
 
-float project::Get_Maximum(std::vector<float> vec) {
-  float max = 0;
-  for (long unsigned int i = 0; i < vec.size(); ++i) {
-    if (vec[i] > max) {
-      max = vec[i];
-    }
-  }
-  return max;
-}
-float project::Get_Minimum(std::vector<float> vec) {
-  float min = 0;
-  for (long unsigned int i = 0; i < vec.size(); ++i) {
-    if (vec[i] < min) {
-      min = vec[i];
-    }
-  }
-  return min;
-}
+
+void System::update_body_count() { n_bodies = bodies.size(); }
