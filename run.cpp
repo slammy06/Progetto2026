@@ -5,7 +5,7 @@
 #include "graphics.hpp"
 #include "main.hpp"
 
-const float dt = 0.10f;
+const float dt = 0.010f;
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -15,10 +15,10 @@ int main(int argc, char* argv[]) {
   // reading data from config.txt
   int N = 0;
   int t = 0;
-  std::vector<float> masses;
-  std::vector<project::point<float>> positions;
-  std::vector<project::point<float>> velocities;
-  std::vector<float> rads;
+  std::vector<double> masses;
+  std::vector<project::point<double>> positions;
+  std::vector<project::point<double>> velocities;
+  std::vector<double> rads;
 
   std::ifstream config(argv[1]);
   if (config.is_open()) {
@@ -59,15 +59,19 @@ int main(int argc, char* argv[]) {
   project::Sim sim;
   sim.initBodies(sys);
 
-  for (float elapsed = 0.0f; elapsed < static_cast<float>(t); elapsed += dt) {
+  for (int step; step < t; ++step) {
     sim.update();
     if (!sim.running()) break;
-
+   
     project::step(sys, dt);
-    sim.initBodies(sys);
+    sim.initBodies(sys);  
     sim.render();
-    sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum(),
+    if(step % 20 == 0){
+          sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum(),
               sys.get_totEnergy());
+    }
+
+      
   }
 
     while (sim.running() || sim.graphing()) {
