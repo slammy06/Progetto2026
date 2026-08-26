@@ -6,7 +6,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-const float G = 500;
+const float G = 100;
 
 using namespace project;
 
@@ -51,8 +51,8 @@ void System::kineticEnergy() {
   float K = 0.f;
 
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
-    float v2 = std::pow(bodies[i].vel.norm(), 2);
-    K += 0.5 * bodies[i].mass * v2;
+    float v2 = bodies[i].vel.norm() * bodies[i].vel.norm();
+    K += 0.5f * bodies[i].mass * v2;
   }
   kinetic.push_back(K);
 }
@@ -63,7 +63,7 @@ void System::potentialEnergy() {
     for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
       point<float> r = bodies[j].pos - bodies[i].pos;
       float norm_r = r.norm();
-      U -= G * bodies[i].mass * bodies[j].mass / (sqrt(norm_r * norm_r));
+      U -= G * bodies[i].mass * bodies[j].mass / norm_r;
     }
   }
   potential.push_back(U);
@@ -86,11 +86,8 @@ void System::linearMomentum() {
 void System::angularMomentum() {
   float L{0.f};
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
-    for (long unsigned int j = 0; j < bodies.size(); ++j) {
-      L += (bodies[i].vel.x * bodies[j].pos.x +
-            bodies[j].vel.x * bodies[i].pos.x) *
-           bodies[i].mass;
-    }
+    L += bodies[i].mass * (bodies[i].pos.x * bodies[i].vel.y -
+                           bodies[i].pos.y * bodies[i].vel.x);
   }
   ang_momentum.push_back(L);
 }
@@ -147,8 +144,8 @@ std::vector<project::check> project::collision_check(
       float r_norm = r.norm();
       float k_min = bodies[i].radius + bodies[j].radius;
       if (r_norm <= k_min) {
-        planets[i].i = i;
-        planets[j].j = j;
+        planets[i].i = static_cast<int>(i);
+        planets[j].j = static_cast<int>(j);
         planets[i].crash = true;
 
       } else {
@@ -175,7 +172,9 @@ inline void project::collided(System& syst, std::vector<check> const& planets) {
         syst.get_bodies()[i].vel =
             syst.get_bodies()[i].vel * syst.get_bodies()[i].mass +
             syst.get_bodies()[j].vel * syst.get_bodies()[j].mass / mass_tot;
-        syst.get_bodies().erase(syst.get_bodies().begin() + j);
+        syst.get_bodies().erase(
+          syst.get_bodies().begin() +
+          static_cast<std::vector<Body>::difference_type>(j));
       }
     }
   }

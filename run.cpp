@@ -5,10 +5,7 @@
 #include "graphics.hpp"
 #include "main.hpp"
 
-const float P_MAX = 800;
-const float V_MAX = 1000;
-const float V_MIN = -1000;
-const float dt = 0.05f;
+const float dt = 0.10f;
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -29,21 +26,22 @@ int main(int argc, char* argv[]) {
       std::cerr << "Configurazione non valida: attesi N > 0 e t >= 0.\n";
       return 1;
     }
-    masses.resize(N);
-    positions.resize(N);
-    velocities.resize(N);
-    rads.resize(N);
-    for (int i = 0; i < N; ++i) {
+    const std::size_t bodyCount = static_cast<std::size_t>(N);
+    masses.resize(bodyCount);
+    positions.resize(bodyCount);
+    velocities.resize(bodyCount);
+    rads.resize(bodyCount);
+    for (std::size_t i = 0; i < bodyCount; ++i) {
       config >> masses[i];
     }
-    for (int i = 0; i < N; ++i) {
+    for (std::size_t i = 0; i < bodyCount; ++i) {
       config >> rads[i];
     }
-    for (int i = 0; i < N; ++i) {
+    for (std::size_t i = 0; i < bodyCount; ++i) {
       config >> positions[i].x;
       config >> positions[i].y;
     }
-    for (int i = 0; i < N; ++i) {
+    for (std::size_t i = 0; i < bodyCount; ++i) {
       config >> velocities[i].x;
       config >> velocities[i].y;
     }
@@ -55,21 +53,23 @@ int main(int argc, char* argv[]) {
   config.close();
   // Initializing simulation and system with data from config.txt
 
-  project::System sys(N, masses, positions, velocities, rads);
+  project::System sys(static_cast<std::size_t>(N), masses, positions,
+                      velocities, rads);
   sys.compute_acceleration();
   project::Sim sim;
   sim.initBodies(sys);
-while(sim.running()){
-  // Simulation Loop: t è la durata della simulazione in secondi.
-  for (float elapsed = 0.0f; elapsed < static_cast<float>(t);
-       elapsed += dt) {
+
+  for (float elapsed = 0.0f; elapsed < static_cast<float>(t); elapsed += dt) {
     sim.update();
     if (!sim.running()) break;
 
     project::step(sys, dt);
     sim.initBodies(sys);
     sim.render();
+    sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum());
   }
-  sim.display_chart(sys.get_lin_momentum(),sys.get_ang_momentum());
-}
+
+    while (sim.running() || sim.graphing()) {
+    sim.pollEvents();
+  }
 }

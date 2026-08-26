@@ -10,17 +10,17 @@ template <typename T1>
 struct point {
   T1 x;
   T1 y;
-  T1 norm() { return sqrt(x * x + y * y); }
+  T1 norm() { return std::sqrt(x * x + y * y); }
 
-  point operator+(const point<T1>& p) { return point<T1>{x + p.x, y + p.y}; };
-  point operator-(const point<T1>& p) { return point<T1>{x - p.x, y - p.y}; };
+  point operator+(const point<T1>& p) { return point<T1>{x + p.x, y + p.y}; }
+  point operator-(const point<T1>& p) { return point<T1>{x - p.x, y - p.y}; }
   point& operator+=(const point<T1>& p) {
     x += p.x;
     y += p.y;
     return *this;
   }
-  point operator*(const float& a) { return point<T1>{x * a, y * a}; };
-  point operator/(const float& a) { return point<T1>{x / a, y / a}; };
+  point operator*(const float& a) { return point<T1>{x * a, y * a}; }
+  point operator/(const float& a) { return point<T1>{x / a, y / a}; }
 };
 
 struct check {
@@ -30,11 +30,11 @@ struct check {
 };
 
 struct Body {
-  point<float> pos{0.0, 0.0};
-  point<float> vel{0.0, 0.0};
-  point<float> acc{0.0, 0.0};
-  float mass{0.0};
-  float radius{0.0};
+  point<float> pos{0.0f, 0.0f};
+  point<float> vel{0.0f, 0.0f};
+  point<float> acc{0.0f, 0.0f};
+  float mass{0.0f};
+  float radius{0.0f};
 };
 
 class System {

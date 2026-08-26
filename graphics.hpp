@@ -25,7 +25,8 @@ class Sim {
 
   // Objects
   std::vector<sf::CircleShape> bodies;
-  sf::CircleShape dot{10.0f};
+  sf::CircleShape dot{2.0f};
+  sf::Font chartFont;
 
   // Private functions
 
@@ -39,6 +40,7 @@ class Sim {
 
   // Accessors
   bool running() const;
+  bool graphing() const;
 
   // Methods
   void update();

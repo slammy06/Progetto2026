@@ -1,10 +1,14 @@
 #include "graphics.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 using namespace project;
 // Private functions
 void Sim::initVariables() {
   this->SimWindow = nullptr;
   this->ChartWindow = nullptr;
+  this->chartFont.loadFromFile("DejaVuSans.ttf");
 }
 void Sim::initWindows() {
   this->VideoMode1.height = 1000;
@@ -32,7 +36,7 @@ Sim::~Sim() { delete this->SimWindow; }
 // Accessors
 
 bool Sim::running() const { return this->SimWindow->isOpen(); }
-
+bool Sim::graphing() const { return this->ChartWindow->isOpen(); }
 // Methods
 
 void Sim::pollEvents() {
@@ -92,43 +96,80 @@ void Sim::render() {
 }
 void Sim::display_chart(std::vector<point<float>> LinMom,
                         std::vector<float> AngMom) {
-  this->dot.setOrigin({10.f, 10.f});
-  std::vector<float> LinMomX;
-  std::vector<float> LinMomY;
-  LinMomX.resize(LinMom.size());
-  LinMomY.resize(LinMom.size());
+  this->dot.setOrigin({2.f, 2.f});
+  // Setting scales
+  const std::size_t samples = std::min(LinMom.size(), AngMom.size());
+  if (samples == 0) return;
 
-  for (long unsigned int i = 0; i < LinMom.size(); ++i) {
-    LinMomX.push_back(LinMom[i].x);
-    LinMomY.push_back(LinMom[i].y);
+  const float panelHeight = static_cast<float>(this->VideoMode2.height) / 3.0f;
+  const float chartWidth = static_cast<float>(this->VideoMode2.width);
+  const float chartLeft = 55.0f;
+  const float plotWidth = chartWidth - chartLeft - 10.0f;
+
+  std::vector<float> linearX(samples);
+  std::vector<float> linearY(samples);
+  for (std::size_t i = 0; i < samples; ++i) {
+    linearX[i] = LinMom[i].x;
+    linearY[i] = LinMom[i].y;
   }
-  float max = Get_Maximum(std::vector<float>{
-      Get_Maximum(LinMomX), Get_Maximum(LinMomY), Get_Minimum(AngMom)});
 
-  float min = Get_Minimum(std::vector<float>{
-      Get_Minimum(LinMomX), Get_Minimum(LinMomY), Get_Minimum(AngMom)});
-  float offset = 50;
-  float scale = (this->VideoMode2.height) / (max + abs(min));
-  for (long unsigned int i = 0; i < AngMom.size(); ++i) {
-    // Drawing Angular Momentum part of chart in Blue
-    this->dot.setFillColor(sf::Color::Blue);
+  const auto maximumAbsolute = [](const std::vector<float>& values) {
+    float result = 0.0f;
+    for (float value : values) {
+      result = std::max(result, std::abs(value));
+    }
+    return result;
+  };
 
-    float x = i * (this->VideoMode2.width) / AngMom.size();
-    float y = AngMom[i] * scale + offset;
-    this->dot.setPosition({x, y});
-    this->ChartWindow->draw(dot);
-    // Drawing Linear Momentum on X axis in Red
-    this->dot.setFillColor(sf::Color::Red);
+  const float scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
+                          maximumAbsolute(linearY)};
+  const std::vector<float>* values[] = {&AngMom, &linearX, &linearY};
+  const sf::Color colors[] = {sf::Color::Blue, sf::Color::Red,
+                              sf::Color::Green};
+  const char* titles[] = {"Angular momentum Lz", "Linear momentum Px",
+                          "Linear momentum Py"};
 
-    y = LinMomX[i] * scale + 2*offset;
-    this->dot.setPosition({x, y});
-    this->ChartWindow->draw(dot);
-    // Drawing Linear Momentum on Y axis in Green
-    this->dot.setFillColor(sf::Color::Green);
+  this->ChartWindow->clear(sf::Color::White);
 
-    y = LinMomY[i] * scale + 3 * offset;
-    this->dot.setPosition({x, y});
-    this->ChartWindow->draw(dot);
+  for (int panel = 0; panel < 3; ++panel) {
+    const float baseline = (static_cast<float>(panel) + 0.7f) * panelHeight;
+    const float scale =
+        scales[panel] == 0.0f ? 0.0f : (panelHeight * 0.45f) / scales[panel];
+    this->dot.setFillColor(colors[panel]);
+
+    sf::Vertex axes[] = {
+        sf::Vertex({chartLeft, baseline - panelHeight * 0.45f},
+                   sf::Color(100, 100, 100)),
+        sf::Vertex({chartLeft, baseline + panelHeight * 0.45f},
+                   sf::Color(100, 100, 100)),
+        sf::Vertex({chartLeft, baseline}, sf::Color(100, 100, 100)),
+        sf::Vertex({chartWidth - 10.0f, baseline}, sf::Color(100, 100, 100))};
+    this->ChartWindow->draw(axes, 4, sf::Lines);
+
+    sf::Text title(titles[panel], this->chartFont, 18);
+    title.setFillColor(sf::Color::Black);
+    title.setPosition({chartLeft, baseline - panelHeight * 0.45f - 24.0f});
+    this->ChartWindow->draw(title);
+
+    sf::Text yLabel("value", this->chartFont, 12);
+    yLabel.setFillColor(sf::Color(80, 80, 80));
+    yLabel.setPosition({5.0f, baseline - panelHeight * 0.45f});
+    this->ChartWindow->draw(yLabel);
+
+    sf::Text xLabel("Time samples", this->chartFont, 12);
+    xLabel.setFillColor(sf::Color(80, 80, 80));
+    xLabel.setPosition({chartWidth - 145.0f, baseline + 5.0f});
+    this->ChartWindow->draw(xLabel);
+
+    for (std::size_t i = 0; i < samples; ++i) {
+      const float x = samples == 1
+                          ? chartLeft
+                          : chartLeft + static_cast<float>(i) * plotWidth /
+                                            static_cast<float>(samples - 1);
+      const float y = baseline - (*values[panel])[i] * scale;
+      this->dot.setPosition({x, y});
+      this->ChartWindow->draw(dot);
+    }
   }
 
   this->ChartWindow->display();
