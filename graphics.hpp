@@ -46,7 +46,8 @@ class Sim {
   void update();
   void render();
   void display_chart(std::vector<point<float>> LinearMomentum,
-                     std::vector<float> AngularMomentum);
+                     std::vector<float> AngularMomentum,
+                     std::vector<float> TotalEnergy);
   void pollEvents();
   void initBodies(System& sys);
 };

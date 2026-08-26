@@ -23,12 +23,6 @@ struct point {
   point operator/(const float& a) { return point<T1>{x / a, y / a}; }
 };
 
-struct check {
-  int i;
-  int j;
-  bool crash;
-};
-
 struct Body {
   point<float> pos{0.0f, 0.0f};
   point<float> vel{0.0f, 0.0f};
@@ -81,12 +75,8 @@ void vel_verlet(System& sys,
 std::vector<point<float>>
 generate_points();  // Generates a vector of random points
 
-std::vector<check> collision_check(
-    System const& sys);  // Checks the system for collisions
-
-void collided(System& syst,
-              std::vector<check> const&
-                  planets);  // Definies the behaviour of colliding bodies
+void collided(
+    System& syst);  // Definies when a collision is detected and its behaviour
 
 void step(System& sys, float dt);
 

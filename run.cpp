@@ -66,7 +66,8 @@ int main(int argc, char* argv[]) {
     project::step(sys, dt);
     sim.initBodies(sys);
     sim.render();
-    sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum());
+    sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum(),
+              sys.get_totEnergy());
   }
 
     while (sim.running() || sim.graphing()) {

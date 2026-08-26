@@ -13,8 +13,8 @@ void Sim::initVariables() {
 void Sim::initWindows() {
   this->VideoMode1.height = 1000;
   this->VideoMode1.width = 1000;
-  this->VideoMode2.height = 800;
-  this->VideoMode2.width = 1000;
+  this->VideoMode2.height = 1000;
+  this->VideoMode2.width = 1200;
 
   this->SimWindow =
       new sf::RenderWindow(this->VideoMode1, "N-Body Simulation",
@@ -95,18 +95,19 @@ void Sim::render() {
   this->SimWindow->display();
 }
 void Sim::display_chart(std::vector<point<float>> LinMom,
-                        std::vector<float> AngMom) {
+                        std::vector<float> AngMom,
+                        std::vector<float> TotalEnergy) {
   this->dot.setOrigin({2.f, 2.f});
   // Setting scales
-  const std::size_t samples = std::min(LinMom.size(), AngMom.size());
+  const std::size_t samples =
+      std::min({LinMom.size(), AngMom.size(), TotalEnergy.size()});
   if (samples == 0) return;
 
-  const float panelHeight = static_cast<float>(this->VideoMode2.height) / 3.0f;
+  const float panelHeight = static_cast<float>(this->VideoMode2.height) / 4.0f;
   const float chartWidth = static_cast<float>(this->VideoMode2.width);
   const float chartLeft = 55.0f;
   const float plotWidth = chartWidth - chartLeft - 10.0f;
 
-  
   std::vector<float> linearX(samples);
   std::vector<float> linearY(samples);
   for (std::size_t i = 0; i < samples; ++i) {
@@ -123,16 +124,18 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
   };
   // Enumerating the samples and their maximums + other style settings
   const float scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
-                          maximumAbsolute(linearY)};
-  const std::vector<float>* values[] = {&AngMom, &linearX, &linearY};
-  const sf::Color colors[] = {sf::Color::Blue, sf::Color::Red,
-                              sf::Color::Green};
+                          maximumAbsolute(linearY),
+                          maximumAbsolute(TotalEnergy)};
+  const std::vector<float>* values[] = {&AngMom, &linearX, &linearY,
+                                        &TotalEnergy};
+  const sf::Color colors[] = {sf::Color::Blue, sf::Color::Red, sf::Color::Green,
+                              sf::Color::Yellow};
   const char* titles[] = {"Angular momentum Lz", "Linear momentum Px",
-                          "Linear momentum Py"};
+                          "Linear momentum Py", "Total energy"};
 
   this->ChartWindow->clear(sf::Color::White);
-// main frame rendering loop
-  for (int panel = 0; panel < 3; ++panel) {
+  // main frame rendering loop
+  for (int panel = 0; panel < 4; ++panel) {
     const float baseline = (static_cast<float>(panel) + 0.65f) * panelHeight;
     const float scale =
         scales[panel] == 0.0f ? 0.0f : (panelHeight * 0.45f) / scales[panel];
