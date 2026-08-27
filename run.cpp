@@ -5,7 +5,7 @@
 #include "graphics.hpp"
 #include "main.hpp"
 
-const float dt = 0.010f;
+const float dt = 0.10f;
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
   project::Sim sim;
   sim.initBodies(sys);
 
-  for (int step; step < t; ++step) {
+  for (int step = 0; step < t; ++step) {
     sim.update();
     if (!sim.running()) break;
    

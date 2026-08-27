@@ -72,8 +72,7 @@ class System {
 // Functions
 void vel_verlet(System& sys,
                 float dt);  // Defines one step for a system type object
-std::vector<point<double>>
-generate_points();  // Generates a vector of random points
+std::vector<point<double>>generate_points();  // Generates a vector of random points
 
 void collided(
     System& syst);  // Definies when a collision is detected and its behaviour

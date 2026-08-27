@@ -132,7 +132,7 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
     const auto minimumAbsolute = [](const std::vector<double>& values) {
     double result = 0.;
     for (double value : values) {
-      result = std::min(result, std::abs(value));
+      result = -std::max(result, std::abs(value));
     }
     return result;
   };
@@ -159,8 +159,9 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
                    sf::Color(100, 100, 100)),
         sf::Vertex({chartLeft, baseline + panelHeight * 0.45f},
                    sf::Color(100, 100, 100)),
+     sf::Vertex({chartWidth - 10.0f, baseline}, sf::Color(100, 100, 100)),
         sf::Vertex({chartLeft, baseline}, sf::Color(100, 100, 100))};
-    this->ChartWindow->draw(axes, 3, sf::Lines);
+    this->ChartWindow->draw(axes, 4, sf::Lines);
 
     sf::Text title(titles[panel], this->chartFont, 18);
     title.setFillColor(sf::Color::Black);

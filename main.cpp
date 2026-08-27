@@ -6,7 +6,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-const double G = 6.67e-11;
+const double G = 6.6743e-11;
 
 using namespace project;
 
@@ -71,6 +71,7 @@ void System::potentialEnergy() {
 
 void System::totalEnergy() {
   totEnergy.push_back(kinetic.back() + potential.back());
+
 }
 
 void System::linearMomentum() {
@@ -79,10 +80,7 @@ void System::linearMomentum() {
     P += bodies[i].vel * bodies[i].mass;
   }
   lin_momentum.push_back(P);
-  std::cout << "Px = " << P.x
-          << "  Py = " << P.y
-          << "  |P| = " << P.norm()
-          << '\n';
+
 }
 
 void System::angularMomentum() {
