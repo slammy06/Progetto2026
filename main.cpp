@@ -6,20 +6,20 @@
 #include <iostream>
 #include <random>
 #include <vector>
-const float G = 100;
+const double G = 6.67e-11;
 
 using namespace project;
 
 // Constructors
 
-System::System(long unsigned int n, std::vector<float> const& masses,
-               std::vector<point<float>> const& pos,
-               std::vector<point<float>> const& vel,
-               std::vector<float> const& rads)
+System::System(long unsigned int n, std::vector<double> const& masses,
+               std::vector<point<double>> const& pos,
+               std::vector<point<double>> const& vel,
+               std::vector<double> const& rads)
     : n_bodies(n) {
   for (long unsigned int i = 0; i < n; i++) {
     bodies.push_back(
-        Body{pos[i], vel[i], point<float>{0.0, 0.0}, masses[i], rads[i]});
+        Body{pos[i], vel[i], point<double>{0.0, 0.0}, masses[i], rads[i]});
   }
 }
 
@@ -31,15 +31,15 @@ System::System(std::vector<Body> const& in_bodies) {
 }
 // Methods
 
-inline void System::compute_acceleration() {  // calculates and sets
+void System::compute_acceleration() {  // calculates and sets
                                               // new accelerations
   for (long unsigned int i = 0; i < n_bodies; ++i) {
     bodies[i].acc = {0.0f, 0.0f};
     for (long unsigned int j = 0; j < n_bodies; ++j) {
       if (i == j) continue;
-      point<float> r = bodies[j].pos - bodies[i].pos;
-      float r_norm = r.norm();
-      bodies[i].acc += point<float>{
+      point<double> r = bodies[j].pos - bodies[i].pos;
+      double r_norm = r.norm();
+      bodies[i].acc += point<double>{
           G * bodies[j].mass * r.x / std::sqrt(std::pow(r_norm * r_norm, 3.0f)),
           G * bodies[j].mass * r.y /
               std::sqrt(std::pow(r_norm * r_norm, 3.0f))};
@@ -48,21 +48,21 @@ inline void System::compute_acceleration() {  // calculates and sets
 }
 
 void System::kineticEnergy() {
-  float K = 0.f;
+  double K = 0.f;
 
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
-    float v2 = bodies[i].vel.norm() * bodies[i].vel.norm();
+    double v2 = bodies[i].vel.norm() * bodies[i].vel.norm();
     K += 0.5f * bodies[i].mass * v2;
   }
   kinetic.push_back(K);
 }
 
 void System::potentialEnergy() {
-  float U = 0.f;
+  double U = 0.f;
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
-      point<float> r = bodies[j].pos - bodies[i].pos;
-      float norm_r = r.norm();
+      point<double> r = bodies[j].pos - bodies[i].pos;
+      double norm_r = r.norm();
       U -= G * bodies[i].mass * bodies[j].mass / norm_r;
     }
   }
@@ -74,15 +74,19 @@ void System::totalEnergy() {
 }
 
 void System::linearMomentum() {
-  point<float> P{0., 0.};
+  point<double> P{0., 0.};
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     P += bodies[i].vel * bodies[i].mass;
   }
   lin_momentum.push_back(P);
+  std::cout << "Px = " << P.x
+          << "  Py = " << P.y
+          << "  |P| = " << P.norm()
+          << '\n';
 }
 
 void System::angularMomentum() {
-  float L{0.f};
+  double L{0.f};
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     L += bodies[i].mass * (bodies[i].pos.x * bodies[i].vel.y -
                            bodies[i].pos.y * bodies[i].vel.x);
@@ -92,7 +96,7 @@ void System::angularMomentum() {
 
 inline auto System::get_accelerations() {  // returns the current accelerations
                                            // of the bodies
-  std::vector<point<float>> acc;
+  std::vector<point<double>> acc;
 
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     acc.push_back(bodies[i].acc);
@@ -106,7 +110,7 @@ void project::vel_verlet(System& sys, float dt) {
   // checking for collisions before updating
   collided(sys);
   // saving previous accelerations
-  std::vector<point<float>> acc = sys.get_accelerations();
+  std::vector<point<double>> acc = sys.get_accelerations();
   // updating the positions
   for (long unsigned int i = 0; i < sys.get_bodies().size(); ++i) {
     sys.get_bodies()[i].pos +=
@@ -156,14 +160,14 @@ void project::vel_verlet(System& sys, float dt) {
 inline void project::collided(System& syst) {
   for (long unsigned int i = 0; i < syst.get_bodies().size(); ++i) {
     for (long unsigned int j = i + 1; j < syst.get_bodies().size(); ++j) {
-      const point<float> distance =
+      const point<double> distance =
           syst.get_bodies()[j].pos - syst.get_bodies()[i].pos;
       if (distance.norm() <=
           syst.get_bodies()[i].radius + syst.get_bodies()[j].radius) {
-        const float first_mass = syst.get_bodies()[i].mass;
-        const float second_mass = syst.get_bodies()[j].mass;
-        const float mass_tot = first_mass + second_mass;
-        const float radius_tot =
+        const double first_mass = syst.get_bodies()[i].mass;
+        const double second_mass = syst.get_bodies()[j].mass;
+        const double mass_tot = first_mass + second_mass;
+        const double radius_tot =
             syst.get_bodies()[i].radius + syst.get_bodies()[j].radius;
         syst.get_bodies()[i].mass = mass_tot;
         syst.get_bodies()[i].radius = radius_tot;
@@ -185,11 +189,12 @@ inline void project::collided(System& syst) {
 }
 void project::step(project::System& sys, float dt) {
   project::vel_verlet(sys, dt);
+  sys.linearMomentum();
+  sys.angularMomentum();
   sys.kineticEnergy();
   sys.potentialEnergy();
   sys.totalEnergy();
-  sys.linearMomentum();
-  sys.angularMomentum();
+
 };
 
 void System::update_body_count() { n_bodies = bodies.size(); }

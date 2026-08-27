@@ -19,33 +19,33 @@ struct point {
     y += p.y;
     return *this;
   }
-  point operator*(const float& a) { return point<T1>{x * a, y * a}; }
-  point operator/(const float& a) { return point<T1>{x / a, y / a}; }
+  point operator*(const double& a) { return point<T1>{x * a, y * a}; }
+  point operator/(const double& a) { return point<T1>{x / a, y / a}; }
 };
 
 struct Body {
-  point<float> pos{0.0f, 0.0f};
-  point<float> vel{0.0f, 0.0f};
-  point<float> acc{0.0f, 0.0f};
-  float mass{0.0f};
-  float radius{0.0f};
+  point<double> pos{0.0f, 0.0f};
+  point<double> vel{0.0f, 0.0f};
+  point<double> acc{0.0f, 0.0f};
+  double mass{0.0f};
+  double radius{0.0f};
 };
 
 class System {
   std::vector<Body> bodies;
-  std::vector<float> kinetic;
-  std::vector<float> potential;
-  std::vector<float> totEnergy;
-  std::vector<point<float>> lin_momentum;
-  std::vector<float> ang_momentum;
+  std::vector<double> kinetic;
+  std::vector<double> potential;
+  std::vector<double> totEnergy;
+  std::vector<point<double>> lin_momentum;
+  std::vector<double> ang_momentum;
   long unsigned int n_bodies{0};
 
  public:
   // Constructors
 
-  System(long unsigned int n, std::vector<float> const& masses,
-         std::vector<point<float>> const& pos,
-         std::vector<point<float>> const& vel, std::vector<float> const& rads);
+  System(long unsigned int n, std::vector<double> const& masses,
+         std::vector<point<double>> const& pos,
+         std::vector<point<double>> const& vel, std::vector<double> const& rads);
   System(std::vector<Body> const& in_bodies);
   // Accessors
 
@@ -72,7 +72,7 @@ class System {
 // Functions
 void vel_verlet(System& sys,
                 float dt);  // Defines one step for a system type object
-std::vector<point<float>>
+std::vector<point<double>>
 generate_points();  // Generates a vector of random points
 
 void collided(
@@ -80,7 +80,7 @@ void collided(
 
 void step(System& sys, float dt);
 
-std::vector<point<float>> generate_points(int n, float min, float max);
+std::vector<point<double>> generate_points(int n, double min, double max);
 
 };  // namespace project
 

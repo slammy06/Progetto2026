@@ -53,13 +53,13 @@ TEST_CASE("1 Planet - Linear") {
 }
 
 TEST_CASE("Figure 8 configuration") {
-  std::vector<float> masses{1.0f, 1.0f, 1.0f};
-  std::vector<float> radii{10.0f, 10.0f, 10.0f};
-  std::vector<project::point<float>> positions{
+  std::vector<double> masses{1.0f, 1.0f, 1.0f};
+  std::vector<double> radii{10.0f, 10.0f, 10.0f};
+  std::vector<project::point<double>> positions{
       {441.7997384f, 514.5852518f},
       {558.2002616f, 485.4147482f},
       {500.0f, 500.0f}};
-  std::vector<project::point<float>> velocities{
+  std::vector<project::point<double>> velocities{
       {0.601866369f, 0.558181757f},
       {0.601866369f, 0.558181757f},
       {-1.203732738f, -1.116363514f}};
