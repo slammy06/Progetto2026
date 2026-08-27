@@ -122,7 +122,7 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
     }
     return result;
   };
-  // Enumerating the samples and their maximums + other style settings
+  // Putting together the samples and their maximums + other style settings
   const float scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
                           maximumAbsolute(linearY),
                           maximumAbsolute(TotalEnergy)};
