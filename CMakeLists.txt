@@ -48,7 +48,7 @@ target_link_libraries(run PRIVATE sfml-graphics)
 if (BUILD_TESTING)
 
   # aggiungi l'eseguibile progetto.t
-  add_executable(run.t main.test.cpp)
+  add_executable(run.t main.test.cpp main.cpp)
   # aggiungi l'eseguibile progetto.t alla lista dei test
   add_test(NAME run.t COMMAND run.t)
 
