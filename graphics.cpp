@@ -122,9 +122,16 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
     }
     return result;
   };
-  // Putting together the samples and their maximums + other style settings
-  const float scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
-                          maximumAbsolute(linearY),
+    const auto minimumAbsolute = [](const std::vector<double>& values) {
+    double result = 0.;
+    for (double value : values) {
+      result = -std::max(result, std::abs(value));
+    }
+    return result;
+  };
+  // Enumerating the samples and their maximums + other style settings
+  const double scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
+                          
                           maximumAbsolute(TotalEnergy)};
   const std::vector<float>* values[] = {&AngMom, &linearX, &linearY,
                                         &TotalEnergy};
@@ -146,8 +153,8 @@ void Sim::display_chart(std::vector<point<float>> LinMom,
                    sf::Color(100, 100, 100)),
         sf::Vertex({chartLeft, baseline + panelHeight * 0.45f},
                    sf::Color(100, 100, 100)),
-        sf::Vertex({chartLeft, baseline}, sf::Color(100, 100, 100)),
-        sf::Vertex({chartWidth - 10.0f, baseline}, sf::Color(100, 100, 100))};
+     sf::Vertex({chartWidth - 10.0f, baseline}, sf::Color(100, 100, 100)),
+        sf::Vertex({chartLeft, baseline}, sf::Color(100, 100, 100))};
     this->ChartWindow->draw(axes, 4, sf::Lines);
 
     sf::Text title(titles[panel], this->chartFont, 18);
