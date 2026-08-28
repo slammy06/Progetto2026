@@ -103,7 +103,7 @@ sys.totalEnergy();
 
     dt++;
   }
- CHECK(sys.get_totEnergy()[dt] == doctest::Approx(0));
+ CHECK(sys.get_totEnergy()[static_cast<std::size_t>(dt)] == doctest::Approx(0.));
    CHECK(sys.get_bodies()[0].pos.x == doctest::Approx(0));
   CHECK(sys.get_bodies()[0].pos.y == doctest::Approx(0));
   CHECK(sys.get_bodies()[0].acc.x == doctest::Approx(0));
