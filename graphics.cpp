@@ -12,9 +12,9 @@ void Sim::initVariables() {
 }
 void Sim::initWindows() {
   this->VideoMode1.height = 1000;
-  this->VideoMode1.width = 900;
+  this->VideoMode1.width = 1000;
   this->VideoMode2.height = 1000;
-  this->VideoMode2.width = 1000;
+  this->VideoMode2.width = 1200;
 
   this->SimWindow =
       new sf::RenderWindow(this->VideoMode1, "N-Body Simulation",
@@ -23,9 +23,6 @@ void Sim::initWindows() {
       new sf::RenderWindow(this->VideoMode2, "Momentum Chart",
                            sf::Style::Titlebar | sf::Style::Close);
   this->SimWindow->setFramerateLimit(60);
-  this->SimWindow->setPosition({0, 0});
-  this->ChartWindow->setFramerateLimit(60);
-  this->ChartWindow->setPosition({900, 0});
 }
 
 // Constructors / Destructors
@@ -73,19 +70,13 @@ void Sim::pollEvents() {
 
 void Sim::initBodies(project::System& sys) {
   this->bodies.resize(sys.get_bodies().size());
-  const float centerX = 450.0f;
-  const float centerY = 500.0f;
-  const float scale = 400.0f;
   for (long unsigned int i = 0; i < sys.get_bodies().size(); ++i) {
     this->bodies[i].setFillColor(sf::Color::White);
-    const float rad = static_cast<float>(sys.get_bodies()[i].radius * scale);
-    this->bodies[i].setRadius(rad);
     this->bodies[i].setOrigin(
-        {rad, rad});
-        const float x = static_cast<float>(centerX + sys.get_bodies()[i].pos.x * scale);
-        const float y = static_cast<float>(centerY + sys.get_bodies()[i].pos.y * scale);
-    this->bodies[i].setPosition({x, y});
-
+        {sys.get_bodies()[i].radius, sys.get_bodies()[i].radius});
+    this->bodies[i].setPosition(
+        {sys.get_bodies()[i].pos.x, sys.get_bodies()[i].pos.y});
+    this->bodies[i].setRadius(sys.get_bodies()[i].radius);
   }
 }
 
@@ -103,9 +94,9 @@ void Sim::render() {
 
   this->SimWindow->display();
 }
-void Sim::display_chart(std::vector<point<double>> LinMom,
-                        std::vector<double> AngMom,
-                        std::vector<double> TotalEnergy) {
+void Sim::display_chart(std::vector<point<float>> LinMom,
+                        std::vector<float> AngMom,
+                        std::vector<float> TotalEnergy) {
   this->dot.setOrigin({2.f, 2.f});
   // Setting scales
   const std::size_t samples =
@@ -117,14 +108,16 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
   const float chartLeft = 55.0f;
   const float plotWidth = chartWidth - chartLeft - 10.0f;
 
-  std::vector<double> linearX(samples);
+  std::vector<float> linearX(samples);
+  std::vector<float> linearY(samples);
   for (std::size_t i = 0; i < samples; ++i) {
-    linearX[i] = LinMom[i].norm();
+    linearX[i] = LinMom[i].x;
+    linearY[i] = LinMom[i].y;
   }
 
-  const auto maximumAbsolute = [](const std::vector<double>& values) {
-    double result = 0.;
-    for (double value : values) {
+  const auto maximumAbsolute = [](const std::vector<float>& values) {
+    float result = 0.0f;
+    for (float value : values) {
       result = std::max(result, std::abs(value));
     }
     return result;
@@ -140,17 +133,18 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
   const double scales[] = {maximumAbsolute(AngMom), maximumAbsolute(linearX),
                           
                           maximumAbsolute(TotalEnergy)};
-  const std::vector<double>* values[] = {&AngMom, &linearX,
+  const std::vector<float>* values[] = {&AngMom, &linearX, &linearY,
                                         &TotalEnergy};
-  const sf::Color colors[] = {sf::Color::Blue, sf::Color::Red,
+  const sf::Color colors[] = {sf::Color::Blue, sf::Color::Red, sf::Color::Green,
                               sf::Color::Yellow};
-  const char* titles[] = {"Angular momentum Lz", "Linear momentum", "Total energy"};
+  const char* titles[] = {"Angular momentum Lz", "Linear momentum Px",
+                          "Linear momentum Py", "Total energy"};
 
   this->ChartWindow->clear(sf::Color::White);
   // main frame rendering loop
-  for (int panel = 0; panel < 3; ++panel) {
+  for (int panel = 0; panel < 4; ++panel) {
     const float baseline = (static_cast<float>(panel) + 0.65f) * panelHeight;
-    const double scale =
+    const float scale =
         scales[panel] == 0.0f ? 0.0f : (panelHeight * 0.45f) / scales[panel];
     this->dot.setFillColor(colors[panel]);
 
@@ -168,6 +162,11 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
     title.setPosition({chartLeft, baseline - panelHeight * 0.45f - 24.0f});
     this->ChartWindow->draw(title);
 
+    sf::Text yLabel("value", this->chartFont, 12);
+    yLabel.setFillColor(sf::Color(80, 80, 80));
+    yLabel.setPosition({5.0f, baseline - panelHeight * 0.45f});
+    this->ChartWindow->draw(yLabel);
+
     sf::Text xLabel("Time samples", this->chartFont, 12);
     xLabel.setFillColor(sf::Color(80, 80, 80));
     xLabel.setPosition({chartWidth - 145.0f, baseline + 5.0f});
@@ -178,35 +177,10 @@ void Sim::display_chart(std::vector<point<double>> LinMom,
                           ? chartLeft
                           : chartLeft + static_cast<float>(i) * plotWidth /
                                             static_cast<float>(samples - 1);
-      const float y = static_cast<float>(baseline - (*values[panel])[i] * scale);
+      const float y = baseline - (*values[panel])[i] * scale;
       this->dot.setPosition({x, y});
       this->ChartWindow->draw(dot);
     }
-    sf::Text maxLabel(
-    std::to_string(maximumAbsolute(*values[panel])),
-    this->chartFont, 12
-);
-
-maxLabel.setFillColor(sf::Color::Black);
-maxLabel.setPosition({
-    5.0f,
-    baseline - panelHeight * 0.45f
-});
-
-this->ChartWindow->draw(maxLabel);
-sf::Text minLabel(
-    std::to_string(minimumAbsolute(*values[panel])),
-    this->chartFont, 12
-);
-
-minLabel.setFillColor(sf::Color::Black);
-
-minLabel.setPosition({
-    5.0f,
-    baseline + panelHeight * 0.45f - 15.0f
-});
-
-this->ChartWindow->draw(minLabel);
   }
 
   this->ChartWindow->display();
