@@ -5,7 +5,7 @@
 #include "graphics.hpp"
 #include "main.hpp"
 
-const float dt = 0.10f;
+const float dt = 0.005f;
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
