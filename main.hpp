@@ -28,9 +28,9 @@ struct point {
 };
 
 struct Body {
-  point<double> pos{0.0f, 0.0f};
-  point<double> vel{0.0f, 0.0f};
-  point<double> acc{0.0f, 0.0f};
+  point<double> pos{0.0, 0.0};
+  point<double> vel{0.0, 0.0};
+  point<double> acc{0.0, 0.0};
   double mass{0.0f};
   double radius{0.0f};
 };
