@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <iostream>
-#include <random>
 #include <vector>
 const double G = 6.6743e-11;
 
@@ -12,7 +10,7 @@ using namespace project;
 
 // Constructors
 
-System::System(long unsigned int n, std::vector<double> const& masses,
+System::System(std::size_t n, std::vector<double> const& masses,
                std::vector<point<double>> const& pos,
                std::vector<point<double>> const& vel,
                std::vector<double> const& rads)
@@ -21,6 +19,7 @@ System::System(long unsigned int n, std::vector<double> const& masses,
     bodies.push_back(
         Body{pos[i], vel[i], point<double>{0.0, 0.0}, masses[i], rads[i]});
   }
+  check_invariant();
 }
 
 System::System(std::vector<Body> const& in_bodies) {
@@ -28,11 +27,20 @@ System::System(std::vector<Body> const& in_bodies) {
   for (long unsigned int i = 0; i < in_bodies.size(); i++) {
     bodies.push_back(in_bodies[i]);
   }
+  check_invariant();
+}
+
+void System::check_invariant() const {
+  assert(n_bodies == bodies.size());
+  for (const Body& body : bodies) {
+    assert(std::isfinite(body.mass) && body.mass >= 0.0);
+    assert(std::isfinite(body.radius) && body.radius >= 0.0);
+  }
 }
 // Methods
 
 void System::compute_acceleration() {  // calculates and sets
-                                              // new accelerations
+                                       // new accelerations
   for (long unsigned int i = 0; i < n_bodies; ++i) {
     bodies[i].acc = {0.0f, 0.0f};
     for (long unsigned int j = 0; j < n_bodies; ++j) {
@@ -45,6 +53,7 @@ void System::compute_acceleration() {  // calculates and sets
               std::sqrt(std::pow(r_norm * r_norm, 3.0f))};
     }
   }
+  check_invariant();
 }
 
 void System::kineticEnergy() {
@@ -71,7 +80,6 @@ void System::potentialEnergy() {
 
 void System::totalEnergy() {
   totEnergy.push_back(kinetic.back() + potential.back());
-
 }
 
 void System::linearMomentum() {
@@ -80,7 +88,6 @@ void System::linearMomentum() {
     P += bodies[i].vel * bodies[i].mass;
   }
   lin_momentum.push_back(P);
-
 }
 
 void System::angularMomentum() {
@@ -122,39 +129,6 @@ void project::vel_verlet(System& sys, float dt) {
   }
 }
 
-/*inline std::vector<point<float>> project::generate_points(int n, float min,
-                                                          float max) {
-  std::vector<point<float>> points;
-
-  std::default_random_engine eng;
-  std::uniform_real_distribution<float> uniform{min, max};
-  std::generate_n(std::back_inserter(points), n,
-                  [&]() { return uniform(eng); });
-  return points;
-}*/
-
-/*std::vector<project::check> project::collision_check(
-    project::System const& sys) {
-  auto const& bodies = sys.get_bodies();
-  std::vector<check> planets(bodies.size(), check{0, 0, false});
-  for (long unsigned int i = 0; i < bodies.size(); ++i) {
-    for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
-      project::point<float> r{std::abs(bodies[i].pos.x - bodies[j].pos.x),
-                              std::abs(bodies[i].pos.y - bodies[j].pos.y)};
-      float r_norm = r.norm();
-      float k_min = bodies[i].radius + bodies[j].radius;
-      if (r_norm <= k_min) {
-        planets[i].i = static_cast<int>(i);
-        planets[j].j = static_cast<int>(j);
-        planets[i].crash = true;
-
-      } else {
-        planets[i].crash = false;
-      }
-    }
-  }
-  return planets;
-}*/
 inline void project::collided(System& syst) {
   for (long unsigned int i = 0; i < syst.get_bodies().size(); ++i) {
     for (long unsigned int j = i + 1; j < syst.get_bodies().size(); ++j) {
@@ -185,14 +159,13 @@ inline void project::collided(System& syst) {
     }
   }
 }
-void project::step(project::System& sys, float dt) {
+void project::step(project::System& sys, const float& dt) {
   project::vel_verlet(sys, dt);
   sys.linearMomentum();
   sys.angularMomentum();
   sys.kineticEnergy();
   sys.potentialEnergy();
   sys.totalEnergy();
-
 };
 
 void System::update_body_count() { n_bodies = bodies.size(); }

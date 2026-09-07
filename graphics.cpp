@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 
 using namespace project;
@@ -9,6 +10,12 @@ void Sim::initVariables()
   this->SimWindow = nullptr;
   this->ChartWindow = nullptr;
   this->chartFont.loadFromFile("DejaVuSans.ttf");
+}
+
+void Sim::check_invariant() const
+{
+  assert(this->SimWindow != nullptr);
+  assert(this->ChartWindow != nullptr);
 }
 void Sim::initWindows()
 {
@@ -27,6 +34,7 @@ void Sim::initWindows()
   this->SimWindow->setPosition({0, 0});
   this->ChartWindow->setFramerateLimit(60);
   this->ChartWindow->setPosition({900, 0});
+  this->check_invariant();
 }
 
 // Constructors / Destructors
@@ -114,9 +122,9 @@ void Sim::render()
 
   this->SimWindow->display();
 }
-void Sim::display_chart(std::vector<point<double>> LinMom,
-                        std::vector<double> AngMom,
-                        std::vector<double> TotalEnergy)
+void Sim::display_chart(const std::vector<point<double>>& LinMom,
+                        const std::vector<double>& AngMom,
+                        const std::vector<double>& TotalEnergy)
 {
   this->dot.setOrigin({2.f, 2.f});
   // Setting scales

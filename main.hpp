@@ -40,12 +40,15 @@ class System {
   std::vector<double> ang_momentum;
   long unsigned int n_bodies{0};
 
+  void check_invariant() const;
+
  public:
   // Constructors
 
-  System(long unsigned int n, std::vector<double> const& masses,
+  System(std::size_t n, std::vector<double> const& masses,
          std::vector<point<double>> const& pos,
-         std::vector<point<double>> const& vel, std::vector<double> const& rads);
+         std::vector<point<double>> const& vel,
+         std::vector<double> const& rads);
   System(std::vector<Body> const& in_bodies);
   // Accessors
 
@@ -57,8 +60,8 @@ class System {
 
   auto get_accelerations();
 
-  auto get_lin_momentum() { return lin_momentum; }
-  auto get_ang_momentum() { return ang_momentum; }
+  auto& get_lin_momentum() { return lin_momentum; }
+  auto& get_ang_momentum() { return ang_momentum; }
   // Methods
 
   void compute_acceleration();
@@ -72,14 +75,11 @@ class System {
 // Functions
 void vel_verlet(System& sys,
                 float dt);  // Defines one step for a system type object
-std::vector<point<double>>generate_points();  // Generates a vector of random points
 
 void collided(
     System& syst);  // Definies when a collision is detected and its behaviour
 
-void step(System& sys, float dt);
-
-std::vector<point<double>> generate_points(int n, double min, double max);
+void step(System& sys, const float& dt);
 
 };  // namespace project
 

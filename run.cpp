@@ -62,19 +62,17 @@ int main(int argc, char* argv[]) {
   for (int step = 0; step < t; ++step) {
     sim.update();
     if (!sim.running()) break;
-   
-    project::step(sys, dt);
-    sim.initBodies(sys);  
-    sim.render();
-    if(step % 20 == 0){
-          sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum(),
-              sys.get_totEnergy());
-    }
 
-      
+    project::step(sys, dt);
+    sim.initBodies(sys);
+    sim.render();
+    if (step % 20 == 0) {
+      sim.display_chart(sys.get_lin_momentum(), sys.get_ang_momentum(),
+                        sys.get_totEnergy());
+    }
   }
 
-    while (sim.running() || sim.graphing()) {
+  while (sim.running() || sim.graphing()) {
     sim.pollEvents();
   }
 }
