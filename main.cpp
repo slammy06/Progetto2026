@@ -1,6 +1,5 @@
 #include "main.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <vector>
@@ -99,8 +98,8 @@ void System::angularMomentum() {
   ang_momentum.push_back(L);
 }
 
-inline auto System::get_accelerations() {  // returns the current accelerations
-                                           // of the bodies
+auto System::get_accelerations() const {  // returns the current accelerations
+                                          // of the bodies
   std::vector<point<double>> acc;
 
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
@@ -159,7 +158,7 @@ inline void project::collided(System& syst) {
     }
   }
 }
-void project::step(project::System& sys, const float& dt) {
+void project::step(project::System& sys, float dt) {
   project::vel_verlet(sys, dt);
   sys.linearMomentum();
   sys.angularMomentum();

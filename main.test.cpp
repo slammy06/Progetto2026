@@ -1,10 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "main.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-
 #include "doctest.h"
 
 TEST_CASE("1 Planet - Static") {

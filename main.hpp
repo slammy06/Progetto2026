@@ -12,15 +12,19 @@ struct point {
   T1 y;
   T1 norm() const { return std::sqrt(x * x + y * y); }
 
-  point operator+(const point<T1>& p) { return point<T1>{x + p.x, y + p.y}; }
-  point operator-(const point<T1>& p) { return point<T1>{x - p.x, y - p.y}; }
+  point operator+(const point<T1>& p) const {
+    return point<T1>{x + p.x, y + p.y};
+  }
+  point operator-(const point<T1>& p) const {
+    return point<T1>{x - p.x, y - p.y};
+  }
   point& operator+=(const point<T1>& p) {
     x += p.x;
     y += p.y;
     return *this;
   }
-  point operator*(const double& a) { return point<T1>{x * a, y * a}; }
-  point operator/(const double& a) { return point<T1>{x / a, y / a}; }
+  point operator*(double a) const { return point<T1>{x * a, y * a}; }
+  point operator/(double a) const { return point<T1>{x / a, y / a}; }
 };
 
 struct Body {
@@ -57,11 +61,14 @@ class System {
   auto const& get_bodies() const { return bodies; }
 
   auto& get_totEnergy() { return totEnergy; }
+  auto const& get_totEnergy() const { return totEnergy; }
 
-  auto get_accelerations();
+  auto get_accelerations() const;
 
   auto& get_lin_momentum() { return lin_momentum; }
+  auto const& get_lin_momentum() const { return lin_momentum; }
   auto& get_ang_momentum() { return ang_momentum; }
+  auto const& get_ang_momentum() const { return ang_momentum; }
   // Methods
 
   void compute_acceleration();
@@ -79,7 +86,7 @@ void vel_verlet(System& sys,
 void collided(
     System& syst);  // Definies when a collision is detected and its behaviour
 
-void step(System& sys, const float& dt);
+void step(System& sys, float dt);
 
 };  // namespace project
 

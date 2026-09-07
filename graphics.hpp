@@ -49,7 +49,7 @@ class Sim {
                      const std::vector<double>& AngularMomentum,
                      const std::vector<double>& TotalEnergy);
   void pollEvents();
-  void initBodies(System& sys);
+  void initBodies(const System& sys);
 };
 }  // namespace project
 
