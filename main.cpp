@@ -1,8 +1,7 @@
 #include "main.hpp"
 
 #include <cassert>
-#include <cmath>
-#include <vector>
+
 const double G = 6.6743e-11;
 
 using namespace project;
@@ -23,18 +22,18 @@ System::System(std::size_t n, std::vector<double> const& masses,
 
 System::System(std::vector<Body> const& in_bodies) {
   n_bodies = in_bodies.size();
-  for (long unsigned int i = 0; i < in_bodies.size(); i++) {
-    bodies.push_back(in_bodies[i]);
-  }
+  bodies = in_bodies;
   check_invariant();
 }
 
 void System::check_invariant() const {
+#ifndef NDEBUG
   assert(n_bodies == bodies.size());
   for (const Body& body : bodies) {
     assert(std::isfinite(body.mass) && body.mass >= 0.0);
     assert(std::isfinite(body.radius) && body.radius >= 0.0);
   }
+#endif
 }
 // Methods
 

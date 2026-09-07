@@ -41,7 +41,10 @@ Sim::Sim() {
   this->initVariables();
   this->initWindows();
 }
-Sim::~Sim() { delete this->SimWindow; }
+Sim::~Sim() {
+  delete this->SimWindow;
+  delete this->ChartWindow;
+}
 
 // Accessors
 

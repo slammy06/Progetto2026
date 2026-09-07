@@ -2,8 +2,6 @@
 #define PROJECT_GRAPHICS_HPP
 
 #include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
 
 #include "main.hpp"
 namespace project {
