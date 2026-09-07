@@ -40,7 +40,7 @@ void System::check_invariant() const {
 void System::compute_acceleration() {  // calculates and sets
                                        // new accelerations
   for (long unsigned int i = 0; i < n_bodies; ++i) {
-    bodies[i].acc = {0.0f, 0.0f};
+    bodies[i].acc = {0.0, 0.0};
     for (long unsigned int j = 0; j < n_bodies; ++j) {
       if (i == j) continue;
       point<double> r = bodies[j].pos - bodies[i].pos;
@@ -48,24 +48,24 @@ void System::compute_acceleration() {  // calculates and sets
       bodies[i].acc += point<double>{
           G * bodies[j].mass * r.x / std::sqrt(std::pow(r_norm * r_norm, 3.0f)),
           G * bodies[j].mass * r.y /
-              std::sqrt(std::pow(r_norm * r_norm, 3.0f))};
+              std::sqrt(std::pow(r_norm * r_norm, 3))};
     }
   }
   check_invariant();
 }
 
 void System::kineticEnergy() {
-  double K = 0.f;
+  double K{0.};
 
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     double v2 = bodies[i].vel.norm() * bodies[i].vel.norm();
-    K += 0.5f * bodies[i].mass * v2;
+    K += 0.5 * bodies[i].mass * v2;
   }
   kinetic.push_back(K);
 }
 
 void System::potentialEnergy() {
-  double U = 0.f;
+  double U{0.};
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     for (long unsigned int j = i + 1; j < bodies.size(); ++j) {
       point<double> r = bodies[j].pos - bodies[i].pos;
@@ -89,7 +89,7 @@ void System::linearMomentum() {
 }
 
 void System::angularMomentum() {
-  double L{0.f};
+  double L{0.};
   for (long unsigned int i = 0; i < bodies.size(); ++i) {
     L += bodies[i].mass * (bodies[i].pos.x * bodies[i].vel.y -
                            bodies[i].pos.y * bodies[i].vel.x);
