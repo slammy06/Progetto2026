@@ -122,7 +122,11 @@ void Sim::display_chart(const std::vector<point<double>> &LinMom,
       std::min({LinMom.size(), AngMom.size(), TotalEnergy.size()});
   if (samples == 0) return;
 
-  const float panelHeight = static_cast<float>(this->VideoMode2.height) / 3.0f;
+  const float chartTop = 45.0f;
+  const float chartBottom = 30.0f;
+  const float panelHeight =
+      (static_cast<float>(this->VideoMode2.height) - chartTop - chartBottom) /
+      3.0f;
   const float chartWidth = static_cast<float>(this->VideoMode2.width);
   const float chartLeft = 55.0f;
   const float plotWidth = chartWidth - chartLeft - 10.0f;
@@ -159,7 +163,8 @@ void Sim::display_chart(const std::vector<point<double>> &LinMom,
   this->ChartWindow->clear(sf::Color::White);
   // main frame rendering loop
   for (int panel = 0; panel < 3; ++panel) {
-    const float baseline = (static_cast<float>(panel) + 0.65f) * panelHeight;
+    const float baseline =
+      chartTop + (static_cast<float>(panel) + 0.5f) * panelHeight;
     const double scale =
         scales[panel] == 0.0f ? 0.0f : (panelHeight * 0.45f) / scales[panel];
     this->dot.setFillColor(colors[panel]);
